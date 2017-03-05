@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Calorie Meter</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-6">
+                <div id="form_search">
+                    <h2>Search</h2>
+
+                    <div class="form-group row">
+                        <div class="col-10">
+                            <input type="text" class="form-control" id="product_searched" placeholder="Search product" data-bind="value: productSearched, event:{change: launchSearch}"/>
+                        </div>
+                        <button class="btn btn-secondary col-2 col-form-label" id="search_button" type="button" data-bind="click: launchSearch">Search</button>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="min_cal_searched" class="col-3 col-form-label">Min calories</label>
+                        <div class="col-9">
+                            <input class="form-control" type="number" id="min_cal_searched" data-bind="value: minCalSearched, event:{change: launchSearch}"/>
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label for="max_cal_searched" class="col-3 col-form-label">Max calories</label>
+                        <div class="col-9">
+                            <input class="form-control" type="number" id="max_cal_searched" data-bind="value: maxCalSearched, event:{change: launchSearch}"/>
+                        </div>
+                    </div>
+                </div>
+
+                <label>Products found : <span data-bind="text: productFounded"></span></label>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Calories</th>
+                            <th>Salt</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: productList">
+                    <tr>
+                        <td data-bind="text: name"></td>
+                        <td data-bind="text: calories"></td>
+                        <td data-bind="text: salt"></td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-sm" data-bind="click: $root.addProductToBasket">+</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                    <tfoot>
+                    <tr>
+                        <td colspan="5" data-bind="template: { name: 'pagination-template', data: productPaginate }, visible: productPaginate.nbPages() > 1"></td>
+                    </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="col-6">
+                <div>
+                    <h2>Profile</h2>
+
+                    <div class="input-group">
+                        <span class="input-group-addon" id="user_profile_label">Current profile</span>
+                        <select class="form-control" id="user_profile" aria-describedby="user_profile_label" title="user_profile" data-bind="options: availableProfiles, value: selectedProfile, optionsText: 'name'"></select>
+                    </div>
+
+                    <label>Calories : <strong data-bind="text: caloriesQuantity"></strong></label>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-bind="style:{width: caloriesProgress() + '%'}, css: caloriesStatus"></div>
+                    </div>
+
+                    <label>Salt : <strong data-bind="text: saltQuantity"></strong></label>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-bind="style:{ width: saltProgress() + '%' }, css: saltStatus"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <h2>Basket</h2>
+
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Calories</th>
+                            <th>Salt</th>
+                            <th>Quantity</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody data-bind="foreach: basketList">
+                        <tr>
+                            <td data-bind="text: name"></td>
+                            <td data-bind="text: calories"></td>
+                            <td data-bind="text: salt"></td>
+                            <td data-bind="text: quantity"></td>
+                            <td>
+                                <button type="button" class="btn btn-primary btn-sm" data-bind="click: $root.addProductToBasket">+</button>
+                                <button type="button" class="btn btn-danger btn-sm" data-bind="click: $root.removeProductOfBasket">-</button>
+                            </td>
+                        </tr>
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td colspan="5" data-bind="template: { name: 'pagination-template', data: basketPaginate }, visible: basketPaginate.nbPages() > 1"></td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/html" id="pagination-template">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" data-bind="visible: page() > 2">
+                <button class="page-link" aria-label="First" data-bind="click: first">
+                    <span aria-hidden="true">&laquo;&laquo;</span>
+                    <span class="sr-only">First</span>
+                </button>
+            </li>
+            <li class="page-item" data-bind="visible: page() > 1">
+                <button class="page-link" aria-label="Previous" data-bind="click: previous">
+                    <span aria-hidden="true">&laquo;</span>
+                    <span class="sr-only">Previous</span>
+                </button>
+            </li>
+            <li class="page-item active">
+                <button class="page-link" data-bind="text: page"></button>
+            </li>
+            <li class="page-item" data-bind="visible: page() < nbPages()">
+                <button class="page-link" aria-label="Next" data-bind="click: next">
+                    <span aria-hidden="true">&raquo;</span>
+                    <span class="sr-only">Next</span>
+                </button>
+            </li>
+            <li class="page-item" data-bind="visible: page() < nbPages() - 1">
+                <button class="page-link" aria-label="Last" data-bind="click: last">
+                    <span aria-hidden="true">&raquo;&raquo;</span>
+                    <span class="sr-only">Last</span>
+                </button>
+            </li>
+        </ul>
+    </script>
+
+    <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
+    <script type='text/javascript' src='http://knockoutjs.com/downloads/knockout-3.2.0.debug.js'></script>
+    <script type='text/javascript' src='https://cdn.jsdelivr.net/tether/1.1.0/tether.min.js'></script>
+    <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/js/bootstrap.min.js'></script>
+    <script type='text/javascript' src='./app.js'></script>
+</body>
+</html>
