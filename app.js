@@ -134,7 +134,7 @@ function AppModelView() {
         let product = self.productSearched();
 
         /** Verify if there is a product else we try to find all of them with * */
-        if (null === product) {
+        if (!product) {
             product = '*';
         } else if ("baguette".toUpperCase() === product.toUpperCase()) {
             /** Profile of Jonathan */
