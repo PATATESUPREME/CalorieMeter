@@ -114,10 +114,10 @@ function AppModelView() {
      */
     self.launchSearch = function () {
         /** Verify if its a new search */
-        if ("search_button" == event.target.id ||
-            "product_searched" == event.target.id ||
-            "min_cal_searched" == event.target.id ||
-            "max_cal_searched" == event.target.id) {
+        if ("search_button" === event.target.id ||
+            "product_searched" === event.target.id ||
+            "min_cal_searched" === event.target.id ||
+            "max_cal_searched" === event.target.id) {
             self.productPaginate.page(1);
         }
         /** Number of elements in the table (Can be up to max 20 with nutritionix) */
@@ -134,8 +134,22 @@ function AppModelView() {
         let product = self.productSearched();
 
         /** Verify if there is a product else we try to find all of them with * */
-        if (null == product) {
+        if (null === product) {
             product = '*';
+        } else if ("baguette".toUpperCase() === product.toUpperCase()) {
+            /** Profile of Jonathan */
+            let Jonathan = new Profile("Jonathan", 2500, 5);
+
+            /** Get the profile by searching by name */
+            let match = ko.utils.arrayFirst(self.availableProfiles(), function(item) {
+                return Jonathan.name === item.name;
+            });
+
+            /** Check if it already exists */
+            if(!match) {
+                /** Add the product to the basket list */
+                self.availableProfiles.push(Jonathan);
+            }
         }
 
         /** A jQuery http request to get the products from nutritionix */
@@ -342,6 +356,32 @@ function AppModelView() {
         /** Returns the amount of salt in the basket */
         return quantity + " / " + maxSalt + "g";
     });
+    /**
+     * Function checking the profile
+     */
+    self.checkProfile = function () {
+        /** Jonathan's Baguette */
+        let Baguette = new Product("666", "Jonathan's Baguette", 900, 2, 1);
+
+        /** Get the product by searching by his name */
+        let match = ko.utils.arrayFirst(self.basketList(), function(item) {
+            return Baguette.name === item.name;
+        });
+
+        /** Is it Jonathan */
+        if ("Jonathan" === self.selectedProfile().name) {
+            /** Check if it already exists */
+            if(!match) {
+                /** Add the product to the basket list */
+                self.basketList.push(Baguette);
+            }
+        } else {
+            if(match) {
+                /** Remove the product to the basket list */
+                self.basketList.remove(match);
+            }
+        }
+    };
 }
 
 /** Activates knockout.js */

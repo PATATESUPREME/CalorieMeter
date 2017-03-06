@@ -142,7 +142,7 @@
                                 - optionsText : {observable}      selectedProfile   The current profiles selected
                                 - value :       {string}          'name'            The field in profile to be displayed
                          -->
-                        <select class="form-control" id="user_profile" aria-describedby="user_profile_label" title="user_profile" data-bind="options: availableProfiles, value: selectedProfile, optionsText: 'name'"></select>
+                        <select class="form-control" id="user_profile" aria-describedby="user_profile_label" title="user_profile" data-bind="options: availableProfiles, value: selectedProfile, optionsText: 'name', event:{change: checkProfile}"></select>
                     </div>
 
                     <!-- Calories quantity in the basket
