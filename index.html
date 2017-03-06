@@ -6,21 +6,25 @@
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.6/css/bootstrap.min.css">
 </head>
 <body>
+    <!-- Bootstrap container for the application -->
     <div class="container">
+        <!-- Bootstrap row to cut the container in 12 parts -->
         <div class="row">
-            <!-- Search -->
+            <!-- Bootstrap column taking half of the row -->
             <div class="col-6">
                 <!-- Search form -->
                 <div id="form_search">
                     <h2>Search</h2>
 
+                    <!-- Bootstrap form group in row -->
                     <div class="form-group row">
-                        <!-- Input to type the product searched -->
-                        <div class="col-10">
+                        <!-- Bootstrap column to take 9/12 parts of the half of the screen application -->
+                        <div class="col-9">
+                            <!-- Input to type the product searched -->
                             <input type="text" class="form-control" id="product_searched" placeholder="Search product" data-bind="value: productSearched, event:{change: launchSearch}"/>
                         </div>
                         <!-- Button to launch the search -->
-                        <button class="btn btn-secondary col-2 col-form-label" id="search_button" type="button" data-bind="click: launchSearch">Search</button>
+                        <button class="btn btn-secondary col-3 col-form-label" id="search_button" type="button" data-bind="click: launchSearch">Search</button>
                     </div>
 
                     <!-- Input to set the minimum calories searched -->
@@ -45,24 +49,32 @@
 
                 <!-- This table contains the products found -->
                 <table class="table">
+                    <!-- Information to display in the products found -->
                     <thead>
                         <tr>
+                            <!-- Name of the product and the brand it's from -->
                             <th>Name</th>
+                            <!-- Calories in the product -->
                             <th>Calories</th>
+                            <!-- Salt in the product -->
                             <th>Salt</th>
+                            <!-- Actions that can be done with the product -->
                             <th>Actions</th>
                         </tr>
                     </thead>
+                    <!-- Display the products found -->
                     <tbody data-bind="foreach: productList">
                     <tr>
                         <td data-bind="text: name"></td>
                         <td data-bind="text: calories"></td>
                         <td data-bind="text: salt"></td>
                         <td>
+                            <!-- Button to add the product to basket or augment it's quantity -->
                             <button type="button" class="btn btn-primary btn-sm" data-bind="click: $root.addProductToBasket">+</button>
                         </td>
                     </tr>
                     </tbody>
+                    <!-- Display the pagination if needed -->
                     <tfoot>
                     <tr>
                         <td colspan="5" data-bind="template: { name: 'pagination-template', data: productPaginate }, visible: productPaginate.nbPages() > 1"></td>
@@ -104,15 +116,22 @@
 
                     <!-- This table contains the products of the basket -->
                     <table class="table">
+                        <!-- Information to display in the basket -->
                         <thead>
                         <tr>
+                            <!-- Name of the product and the brand it's from -->
                             <th>Name</th>
+                            <!-- Calories in the product -->
                             <th>Calories</th>
+                            <!-- Salt in the product -->
                             <th>Salt</th>
+                            <!-- Quantity of this product -->
                             <th>Quantity</th>
+                            <!-- Actions that can be done with the product -->
                             <th>Actions</th>
                         </tr>
                         </thead>
+                        <!-- Display the products in the basket-->
                         <tbody data-bind="foreach: basketListSliced">
                         <tr>
                             <td data-bind="text: name"></td>
@@ -120,11 +139,14 @@
                             <td data-bind="text: salt"></td>
                             <td data-bind="text: quantity"></td>
                             <td>
+                                <!-- Button to augment the product's quantity -->
                                 <button type="button" class="btn btn-primary btn-sm" data-bind="click: $root.addProductToBasket">+</button>
+                                <!-- Button to decrease the product's quantity or to remove the product of the basket -->
                                 <button type="button" class="btn btn-danger btn-sm" data-bind="click: $root.removeProductOfBasket">-</button>
                             </td>
                         </tr>
                         </tbody>
+                        <!-- Display the pagination if needed -->
                         <tfoot>
                         <tr>
                             <td colspan="5" data-bind="template: { name: 'pagination-template', data: basketPaginate }, visible: basketPaginate.nbPages() > 1"></td>
