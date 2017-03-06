@@ -69,7 +69,28 @@ Barre de recherche
 
 #### Réalisation
 
-![CalorieMeter_searchBar]("Search Bar")
+##### A quoi ça resemble
+
+![CalorieMeter_searchBar](./ressources/images/CalorieMeter_searchBar.PNG "Search Bar")
+
+La barre de recherche ci-dessus permet de chercher des aliments dans Nutritionix. 
+
+##### Comment ça marche
+
+- L'observateur
+``` javascript
+/** Ceci est l'observateur de Knockout sur le champ de saisie */
+self.productSearched = ko.observable();
+```
+
+- Le champ de saisie
+``` html
+<!-- Ceci est le champ de saisie et ses data-bind
+     data-bind :
+         - value : {observable} productSearched L'observateur vu ci-dessus
+-->
+<input type="text" data-bind="value: productSearched"/>
+```
 
 Résultats d'une recherche
 -------------------------------
@@ -80,6 +101,132 @@ Résultats d'une recherche
 
 #### Réalisation
 
+##### A quoi ça resemble
+
+![CalorieMeter_searchResult](./ressources/images/CalorieMeter_searchResult.PNG "Search Result")
+
+Grâce au champ de saisie vu précédement on peut afficher des produits venu de nutritionix.
+
+##### Comment ça marche
+
+- L'observateur
+``` javascript
+/** Liste des produits */
+self.productList = ko.observableArray();
+```
+
+- La classe Produit
+``` javascript
+/**
+ * Classe produit
+ *
+ * @param {string} id       Id du produit
+ * @param {string} name     Nom du produit
+ * @param {number} calories Calories du produit
+ * @param {number} salt     Sel du produit
+ * @param {int}    quantity Quantité de produit
+ * @constructor
+ */
+function Product(id, name, calories, salt, quantity = 1) {
+    /** Variables pour éviter des comportement non voulu de this */
+    let self = this;
+
+    self.id = id;
+    self.name = name;
+    self.calories = calories;
+    self.salt = salt;
+    self.quantity = ko.observable(quantity);
+}
+```
+
+- La fonction de récupération des données
+``` javascript
+/**
+ * Fonction récupérant les produits de Nutritionix
+ */
+self.launchSearch = function () {
+    /** Nombre d'élément à afficher dans la table (Peut aller jusqu'à max 20 avec Nutritionix) */
+    let interval = 5;
+    /** On calcule l'interval */
+    let end = interval * self.productPaginate.page();
+    let start = end - interval;
+    /** Choix des champs ('*' pour les avoir tous) */
+    let fields = "*";
+    /** Mon appId et appKey pour accéder à Nutritionix */
+    let appId = "d62702c9";
+    let appKey = "3b33a35fc17e370e050895ced60c1798";
+    /** On récupère ce qui se trouve dans l'observateur du champ de saisie */
+    let product = self.productSearched();
+
+    /** On vérifie si le champ n'est pas vide */
+    if (!product) {
+        product = '*';
+    }
+
+    /** La requète JQuery pour récupérer les produits dans Nutritionix */
+    $.getJSON("https://api.nutritionix.com/v1_1/search/" + product +
+        "?results=" + start + "%3A" + end +
+        "&cal_min=" + 0 +
+        "&cal_max=" + 50000 +
+        "&fields=" + fields +
+        "&appId=" + appId +
+        "&appKey=" + appKey,
+        function(data) {
+            /** On supprime le contenu de l'observateur */
+            self.productList.removeAll();
+
+            /** Puis ajoute les résultats résupérés */
+            data.hits.forEach(function (product) {
+                /** On hydrate des objets de type Produit puis on les ajoute à l'observateur */
+                self.productList.push(
+                    new Product(
+                        product.fields.item_id,
+                        product.fields.brand_name + ", " + product.fields.item_name,
+                        product.fields.nf_calories,
+                        product.fields.nf_sodium/1000
+                    ));
+            })
+        })
+    ;
+};
+```
+
+- Le tableau affichant les résultats
+``` html
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Calories</th>
+            <th>Salt</th>
+        </tr>
+    </thead>
+    <!-- Affichage des produits
+         data-bind :
+            - foreach : {observableArray} productList On affiche chaque produits de l'observateur
+    -->
+    <tbody data-bind="foreach: productList">
+    <tr>
+        <!-- Affichage du nom
+             data-bind :
+                - text : {string} name Le nom du produit
+        -->
+        <td data-bind="text: name"></td>
+        <!-- Affichage des calories
+             data-bind :
+                - text : {number} calories Les calories du produit
+        -->
+        <td data-bind="text: calories"></td>
+        <!-- Affichage du sel
+             data-bind :
+                - text : {number} salt Le sel du produit
+        -->
+        <td data-bind="text: salt"></td>
+    </tr>
+    </tbody>
+</table>
+```
+
 Garde manger
 -------------------------------
 
@@ -88,6 +235,10 @@ Garde manger
 > Les aliments sélectionnés par l'utilisateur sont placer dans le "garde manger" qui n'est ni plus ni moins que l'ensemble des aliments sélectionnés jusqu'à alors. Les aliments sont ajoutés avec une quantité unitaire par défaut. Mais il est possible de modifier cette quantité pour chaque aliment. Pour chaque aliment, l'apport calorifique est indiqué dynamiquement en tenant compte de la quantité choisie par l'utilisateur. Il est aussi possible de supprimer des aliments du garde manger. Toutes les modifications effectuées sur le garde manger modifie la valeur calorifique totale du garde manger qui est aussi tenue à jour dynamiquement.
 
 #### Réalisation
+
+##### A quoi ça resemble
+
+##### Comment ça marche
 
 Navigation
 -------------------------------
@@ -109,6 +260,10 @@ Profil utilisateur
 
 #### Réalisation
 
+##### A quoi ça resemble
+
+##### Comment ça marche
+
 Seuil d'alerte
 -------------------------------
 
@@ -117,6 +272,10 @@ Seuil d'alerte
 > L'application alerte l'utilisateur si la valeur calorifique de son garde manger excède l'apport journalier idéal défini par son profil. L'application affiche aussi en permanence combien de calories peuvent être encore ajoutée au garde manger avant d'atteindre le seuil d'alerte.
 
 #### Réalisation
+
+##### A quoi ça resemble
+
+##### Comment ça marche
 
 Recherche bornée
 -------------------------------
@@ -127,6 +286,10 @@ Recherche bornée
 
 #### Réalisation
 
+##### A quoi ça resemble
+
+##### Comment ça marche
+
 Informations complémentaires
 -------------------------------
 
@@ -135,3 +298,7 @@ Informations complémentaires
 > En plus des calories, l'application calcule (chaque fois que possible) pour chaque aliment et pour l'ensemble du garde manger la quantité de graisses saturées et la quantité de sel (sodium). On mettra également un seuil d'alerte sur le sel sachant que l'OMS préconise un apport journalier inférieur à 5 grammes.
 
 #### Réalisation
+
+##### A quoi ça resemble
+
+##### Comment ça marche
