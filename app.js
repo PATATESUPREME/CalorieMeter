@@ -85,11 +85,106 @@ function AppModelView() {
         return self.launchSearch();
     });
 
+    /**
+     * Function launching the research of a list of products
+     */
+    self.launchSearch = function () {
+        if ("search_button" == event.target.id ||
+            "product_searched" == event.target.id ||
+            "min_cal_searched" == event.target.id ||
+            "max_cal_searched" == event.target.id) {
+            self.productPaginate.page(1);
+        }
+        let interval = 5;
+        let end = interval * self.productPaginate.page();
+        let start = end - interval;
+        let fields = "*";
+        let appId = "d62702c9";
+        let appKey = "3b33a35fc17e370e050895ced60c1798";
+        let product = self.productSearched();
+
+        if (null == product) {
+            product = '*';
+        }
+
+        $.getJSON("https://api.nutritionix.com/v1_1/search/" + product +
+            "?results=" + start + "%3A" + end +
+            "&cal_min=" + self.minCalSearched() +
+            "&cal_max=" + self.maxCalSearched() +
+            "&fields=" + fields +
+            "&appId=" + appId +
+            "&appKey=" + appKey,
+            function(data) {
+                console.log(data);
+                let nbPages = 1;
+
+                self.productFounded(data.total_hits);
+                if (10000 < data.total_hits) {
+                    nbPages = parseInt(10000 / interval) + 1;
+                } else {
+                    nbPages = parseInt(data.total_hits / interval) + 1;
+                }
+                self.productPaginate.nbPages(nbPages);
+
+                self.productList.removeAll();
+                data.hits.forEach(function (product) {
+                    self.productList.push(
+                        new Product(
+                            product.fields.item_id,
+                            product.fields.brand_name + ", " + product.fields.item_name,
+                            product.fields.nf_calories,
+                            product.fields.nf_sodium/1000
+                        ));
+                })
+            })
+        ;
+    };
+
     /** Basket variables */
     self.basketList = ko.observableArray();
+    self.basketStartIndex = ko.observable(0);
+    self.basketInterval = ko.observable(5);
     self.basketPaginate = new Paginate(1, 0, function() {
-        return self.launchSearch();
+        return self.changePageBasket();
     });
+    self.basketListSliced = ko.computed(function() {
+        self.basketPaginate.nbPages(parseInt((self.basketList().length - 1) / self.basketInterval()) + 1);
+
+        return self.basketList.slice(self.basketStartIndex(), self.basketStartIndex() + self.basketInterval());
+    });
+
+    self.changePageBasket = function () {
+        self.basketStartIndex(self.basketPaginate.page() * self.basketInterval() - self.basketInterval());
+    };
+
+    /**
+     * Function adding a product to the basket
+     *
+     * @param product
+     */
+    self.addProductToBasket = function (product) {
+        let index = self.basketList.indexOf(product);
+        if(index > -1) {
+            self.basketList()[index].quantity(self.basketList()[index].quantity() + 1);
+        } else {
+            self.basketList.push(product);
+        }
+    };
+
+    /**
+     * Function removing a product of the basket
+     *
+     * @param product
+     */
+    self.removeProductOfBasket = function (product) {
+        let index = self.basketList.indexOf(product);
+        let quantity = self.basketList()[index].quantity();
+        if(quantity > 1) {
+            self.basketList()[index].quantity(self.basketList()[index].quantity() - 1);
+        } else {
+            self.basketList.remove(product);
+        }
+    };
 
     /** Profile variables */
     self.selectedProfile = ko.observable();
@@ -153,90 +248,6 @@ function AppModelView() {
 
         return total + " / " + maxCalories + "kcal";
     });
-
-    /**
-     * Function adding a product to the basket
-     *
-     * @param product
-     */
-    self.addProductToBasket = function (product) {
-        let index = self.basketList.indexOf(product);
-        if(index > -1) {
-            self.basketList()[index].quantity(self.basketList()[index].quantity() + 1);
-        } else {
-            self.basketList.push(product);
-        }
-    };
-
-    /**
-     * Function removing a product of the basket
-     *
-     * @param product
-     */
-    self.removeProductOfBasket = function (product) {
-        let index = self.basketList.indexOf(product);
-        let quantity = self.basketList()[index].quantity();
-        if(quantity > 1) {
-            self.basketList()[index].quantity(self.basketList()[index].quantity() - 1);
-        } else {
-            self.basketList.remove(product);
-        }
-    };
-
-    /**
-     * Function launching the research of a list of products
-     */
-    self.launchSearch = function () {
-        if ("search_button" == event.target.id ||
-            "product_searched" == event.target.id ||
-            "min_cal_searched" == event.target.id ||
-            "max_cal_searched" == event.target.id) {
-            self.productPaginate.page(1);
-        }
-        let interval = 5;
-        let end = interval * self.productPaginate.page();
-        let start = end - interval;
-        let fields = "*";
-        let appId = "d62702c9";
-        let appKey = "3b33a35fc17e370e050895ced60c1798";
-        let product = self.productSearched();
-
-        if (null == product) {
-            product = '*';
-        }
-
-        $.getJSON("https://api.nutritionix.com/v1_1/search/" + product +
-            "?results=" + start + "%3A" + end +
-            "&cal_min=" + self.minCalSearched() +
-            "&cal_max=" + self.maxCalSearched() +
-            "&fields=" + fields +
-            "&appId=" + appId +
-            "&appKey=" + appKey,
-            function(data) {
-                console.log(data);
-                let nbPages = 1;
-
-                self.productFounded(data.total_hits);
-                if (10000 < data.total_hits) {
-                    nbPages = 10000 / interval;
-                } else {
-                    nbPages = data.total_hits / interval;
-                }
-                self.productPaginate.nbPages(nbPages);
-
-                self.productList.removeAll();
-                data.hits.forEach(function (product) {
-                    self.productList.push(
-                        new Product(
-                            product.fields.item_id,
-                            product.fields.brand_name + ", " + product.fields.item_name,
-                            product.fields.nf_calories,
-                            product.fields.nf_sodium/1000
-                        ));
-                })
-            })
-        ;
-    };
 }
 
 // Activates knockout.js
