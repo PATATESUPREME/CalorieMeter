@@ -138,7 +138,7 @@ function AppModelView() {
             product = '*';
         } else if ("baguette".toUpperCase() === product.toUpperCase()) {
             /** Profile of Jonathan */
-            let Jonathan = new Profile("Jonathan", 2500, 5);
+            let Jonathan = new Profile("Jonathan", 4500, 5);
 
             /** Get the profile by searching by name */
             let match = ko.utils.arrayFirst(self.availableProfiles(), function(item) {
@@ -361,7 +361,7 @@ function AppModelView() {
      */
     self.checkProfile = function () {
         /** Jonathan's Baguette */
-        let Baguette = new Product("666", "Jonathan's Baguette", 900, 2, 1);
+        let Baguette = new Product("666", "Jonathan's Baguette", 900, 1, 4);
 
         /** Get the product by searching by his name */
         let match = ko.utils.arrayFirst(self.basketList(), function(item) {
